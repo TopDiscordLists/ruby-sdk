@@ -81,6 +81,10 @@ module TopDiscordList
       request("/v1/votes?#{URI.encode_www_form(limit: limit, page: page)}")
     end
 
+    def analytics(days: 7)
+      request("/v1/analytics?#{URI.encode_www_form(days: days)}")
+    end
+
     def post_stats(slug, server_count:, user_count: nil, shard_count: nil)
       body = { serverCount: server_count }
       body[:userCount] = user_count unless user_count.nil?

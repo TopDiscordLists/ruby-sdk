@@ -108,6 +108,7 @@ client.listing
 client.has_voted("123456789012345678")
 client.has_voted_by_user_id("user_abc")
 client.votes(limit: 50, page: 1)
+client.analytics(days: 7)
 client.post_stats("my-bot", server_count: 1200, shard_count: 4)
 ```
 
