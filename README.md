@@ -10,7 +10,7 @@ gem install top_discord_list
 ```ruby
 require "top_discord_list"
 
-halt 401 unless TopDiscordList.verify_signature(secret, signature_header, raw_body)
+halt 401 unless TopDiscordList.verify_signature(token, signature_header, raw_body)
 ```
 
 Ruby 3.0 or newer, standard library only. No gems get pulled in behind it.
@@ -36,10 +36,10 @@ Open your listing, hit **Edit listing**, scroll to **Developer integrations**,
 and generate a listing token. It is shown once, so put it straight into an
 environment variable.
 
-There are two secrets and they do different jobs. The **listing token**
-authenticates you to us, for the API. The **webhook secret** authenticates us to
-you, so you can tell a real delivery from someone who guessed your URL.
-Rotating one does not affect the other.
+That one token does every job. It authenticates you to us for the API and the
+vote stream, and it is the key we sign your webhooks with, so you can tell a
+real delivery from someone who guessed your URL. There is nothing else to
+manage. If you regenerate it, update it everywhere at once.
 
 ## Verifying a webhook
 
@@ -50,7 +50,7 @@ post "/vote" do
   raw = request.body.read
   signature = request.env["HTTP_X_TDL_SIGNATURE"]
 
-  halt 401 unless TopDiscordList.verify_signature(SECRET, signature, raw)
+  halt 401 unless TopDiscordList.verify_signature(TOKEN, signature, raw)
 
   payload = JSON.parse(raw)
   give_reward(payload["user"]["discordId"]) unless payload["vote"]["isTest"]
@@ -66,7 +66,7 @@ class VotesController < ActionController::API
     raw = request.raw_post
     signature = request.headers["X-TDL-Signature"]
 
-    return head :unauthorized unless TopDiscordList.verify_signature(SECRET, signature, raw)
+    return head :unauthorized unless TopDiscordList.verify_signature(TOKEN, signature, raw)
 
     payload = JSON.parse(raw)
     GiveRewardJob.perform_later(payload["user"]["discordId"]) unless payload["vote"]["isTest"]
