@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  EXPECTED: '{"invalidSig":false,"malformed":false,"staleAcceptedNoTolerance":true,"staleRejected":false,"staleTs":false,"tamperedBody":false,"valid":true,"wrongSecret":false}'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test vectors match the canonical copy
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/TopDiscordLists/api-docs/main/test-vectors.json -o /tmp/canonical.json
+          diff /tmp/canonical.json test-vectors.json && echo "vectors in sync"
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+
+      - name: Build the gem
+        run: gem build top_discord_list.gemspec
+
+      - name: Signature conformance
+        run: |
+          ACTUAL=$(ruby conformance/run.rb 2>&1 | tail -1)
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "conformance FAILED"
+            echo "  expected $EXPECTED"
+            echo "  actual   $ACTUAL"
+            exit 1
+          fi
+          echo "conformance passed, all 8 cases match"
