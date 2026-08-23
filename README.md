@@ -7,6 +7,13 @@ Hand out rewards when someone votes for your Discord server or bot on
 gem install top_discord_list
 ```
 
+> **Not on RubyGems yet.** The first release is still to come. Until then, in
+> your `Gemfile`:
+>
+> ```ruby
+> gem "top_discord_list", git: "https://github.com/TopDiscordLists/ruby-sdk"
+> ```
+
 ```ruby
 require "top_discord_list"
 
